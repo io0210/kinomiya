@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>紀宮鉄道｜公式サイト</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#071233; --navy-2:#0A1A3F; --gold:#D4A857; --white:#fff; --muted:#F4F6FA;
+  --ok:#10B981; --warn:#F59E0B; --danger:#EF4444;
+  --card-shadow: 0 12px 36px rgba(10,26,63,0.08); --radius:12px; --max-width:1200px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Noto Sans JP","Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;color:#0f1724;background:linear-gradient(180deg,#f7f9fc,#f3f6fb);-webkit-font-smoothing:antialiased}
+.container{max-width:var(--max-width);margin:0 auto;padding:20px}
+.header{display:flex;align-items:center;gap:12px;padding:12px;background:linear-gradient(90deg,var(--navy),var(--navy-2));color:var(--white);border-radius:12px}
+.logo{font-weight:800;font-size:18px}
+.lang-toggle{margin-left:auto;background:transparent;border:1px solid rgba(255,255,255,0.18);color:#fff;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700}
+.hamburger{width:44px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.hamburger .bar{width:26px;height:3px;background:rgba(255,255,255,0.95);border-radius:3px;transition:all .22s}
+.hamburger.open .bar:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open .bar:nth-child(2){opacity:0}
+.hamburger.open .bar:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* 運行バナー */
+.status-banner{margin-top:12px;border-radius:10px;padding:12px;display:flex;align-items:center;gap:12px;box-shadow:var(--card-shadow)}
+.status-dot{width:12px;height:12px;border-radius:50%}
+.status-text{font-weight:700;color:var(--navy)}
+.status-detail{margin-left:auto;font-size:13px;color:#334155;cursor:pointer}
+
+/* メニュー */
+.menu-panel{position:fixed;left:20px;top:84px;width:360px;max-width:92%;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:12px;box-shadow:0 30px 80px rgba(2,6,23,0.18);padding:12px;display:none;z-index:120}
+.menu-panel .inner{max-height:72vh;overflow:auto;padding-right:6px;-webkit-overflow-scrolling:touch}
+.menu-panel h4{margin:6px 0 8px 0;color:var(--navy)}
+.search-box{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.search-box input{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(10,26,63,0.06);font-size:14px}
+.search-results .row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.search-results a{flex:1;padding:8px;border-radius:8px;color:#0b2540;text-decoration:none;border:1px solid rgba(10,26,63,0.04);background:#fff}
+.open-btn{background:var(--gold);color:var(--navy);border-radius:8px;padding:6px 8px;font-weight:700;border:0;cursor:pointer}
+
+/* カテゴリボタン */
+.cat-btn{padding:8px 10px;border-radius:999px;border:1px solid rgba(10,26,63,0.06);background:#f8fafc;cursor:pointer;font-weight:700;color:#0b2540;margin:4px 4px 8px 0}
+.cat-btn.active{background:var(--navy);color:var(--white);border-color:transparent}
+
+/* レイアウト・カード */
+.page{display:none}
+.page.active{display:block}
+.hero{background:linear-gradient(180deg,rgba(10,26,63,0.98),rgba(10,26,63,0.92));color:var(--white);padding:28px;border-radius:12px;margin-top:18px;box-shadow:var(--card-shadow)}
+.route-graphic{margin-top:18px;padding:18px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center}
+
+/* 駅名を白で固定（SVG） */
+.station-label,
+.station-id {
+  fill: #ffffff !important;
+  stroke: rgba(0,0,0,0.45);
+  paint-order: stroke fill;
+}
+
+.grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:18px}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.card{background:var(--white);border-radius:var(--radius);padding:16px;box-shadow:var(--card-shadow)}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
+.station-card{background:linear-gradient(180deg,#fff,#fbfdff);padding:14px;border-radius:12px;border:1px solid rgba(10,26,63,0.04);cursor:pointer;transition:transform .16s ease}
+.station-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(10,26,63,0.12)}
+.station-card h3{margin:0 0 6px 0;color:var(--navy);font-size:16px}
+.station-card .meta-line{font-size:13px;color:#6b7280;margin-top:6px}
+.station-thumb{width:100%;height:120px;object-fit:cover;border-radius:10px;display:block;background:linear-gradient(135deg,#eef6ff,#fff);border:1px solid rgba(10,26,63,0.04);margin-bottom:8px}
+.back-btn{display:inline-block;padding:8px 12px;border-radius:8px;background:#f1f5f9;border:1px solid rgba(10,26,63,0.06);cursor:pointer;margin-top:12px}
+
+/* FAQ */
+.faq-item{border-top:1px solid rgba(10,26,63,0.06);padding:12px 0}
+.faq-q{font-weight:700;color:var(--navy);cursor:pointer}
+.faq-a{margin-top:8px;color:#334155;display:none}
+
+/* モーダル */
+.modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:1200}
+.modal{background:var(--white);width:100%;max-width:820px;border-radius:12px;padding:18px;box-shadow:0 30px 80px rgba(2,6,23,0.6);transform:translateY(12px);opacity:0;transition:all .22s ease}
+.modal.show{transform:translateY(0);opacity:1}
+.modal-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.close-btn{background:transparent;border:0;font-size:18px;cursor:pointer;color:#6b7280}
+.photo{width:100%;height:140px;border-radius:10px;background:linear-gradient(135deg,#e6f0ff,#f7f9fc);display:flex;align-items:flex-end;padding:12px;color:var(--navy);box-shadow:inset 0 -20px 40px rgba(10,26,63,0.03);border:1px solid rgba(10,26,63,0.04);font-weight:700;font-size:14px}
+.stat-grid{display:flex;gap:8px;margin-top:10px}
+.stat{flex:1;background:linear-gradient(180deg,#fff,#fbfdff);padding:10px;border-radius:8px;border:1px solid rgba(10,26,63,0.04);text-align:center}
+.stat .num{font-weight:800;color:var(--navy);font-size:18px}
+.info-list{margin:8px 0 0 0;padding:0;list-style:none;color:#334155}
+.info-list li{margin:6px 0;font-size:14px}
+.event{background:linear-gradient(180deg,#fff,#fff7ed);padding:8px;border-radius:8px;border:1px solid rgba(212,168,87,0.12);margin-bottom:8px}
+.footer{background:var(--navy);color:var(--white);padding:18px 24px;border-radius:8px;margin-top:22px;text-align:center}
+.small{font-size:13px;color:#6b7280}
+</style>
+</head>
+<body>
+  <header class="container" style="padding:0">
+    <div class="header">
+      <div class="hamburger" id="hamburger" aria-label="menu" tabindex="0">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </div>
+      <div class="logo"><span data-i18n="siteTitle">紀宮鉄道</span> <span class="sub" data-i18n="logoSub">Kinomiya Railway</span></div>
+      <button id="langToggle" class="lang-toggle">EN</button>
+    </div>
+
+    <!-- 運行ステータスバナー -->
+    <div id="statusBanner" class="status-banner container" style="margin-top:12px">
+      <div id="statusDot" class="status-dot" style="background:var(--ok)"></div>
+      <div>
+        <div class="status-text" id="statusMain" data-i18n="statusMain">現在、平常運行しています</div>
+        <div class="small" id="statusSub" data-i18n="statusSub">最新情報はここに表示されます</div>
+      </div>
+      <div class="status-detail" id="statusDetailToggle" data-i18n="statusDetailToggle">区間別を見る ▾</div>
+    </div>
+
+    <!-- 区間別詳細（折りたたみ） -->
+    <div id="statusDetail" class="container card" style="margin-top:10px;display:none">
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <strong data-i18n="seg1Title">縦浜〜篠宮</strong>
+          <div class="small" id="seg1">平常（遅延なし）</div>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <strong data-i18n="seg2Title">篠宮〜枦崎</strong>
+          <div class="small" id="seg2">平常（遅延なし）</div>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <strong data-i18n="seg3Title">枦崎〜山宮</strong>
+          <div class="small" id="seg3">平常（遅延なし）</div>
+        </div>
+        <div style="min-width:160px;text-align:right">
+          <div class="small" data-i18n="subscribeLabel">購読</div>
+          <div style="margin-top:6px">
+            <button onclick="alert('RSS mock')" style="padding:8px;border-radius:8px;border:1px solid rgba(10,26,63,0.06);background:#fff">RSS</button>
+            <button onclick="alert('Mail mock')" style="padding:8px;border-radius:8px;border:0;background:var(--gold);color:var(--navy);margin-left:6px" data-i18n="mailBtn">メール</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- メニュー -->
+  <div class="menu-panel" id="menuPanel" aria-hidden="true">
+    <div class="inner" id="panelInner" tabindex="0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong style="color:var(--navy)" data-i18n="menuTitle">メニュー</strong>
+        <div style="color:var(--navy);font-weight:700"><span id="miniStatus" data-i18n="miniStatus">平常</span></div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <h4 data-i18n="mainPages">主要ページ</h4>
+        <a class="menu-link" href="#" data-page="home" data-i18n="navHome">ホーム</a>
+        <a class="menu-link" href="#" data-page="stations" data-i18n="navStations">駅情報</a>
+        <a class="menu-link" href="#" data-page="company" data-i18n="navCompany">企業情報</a>
+        <a class="menu-link" href="#" data-page="news" data-i18n="navNews">ニュース</a>
+        <a class="menu-link" href="#" data-page="safety" data-i18n="navSafety">安全情報</a>
+        <a class="menu-link" href="#" data-page="faq" data-i18n="navFAQ">FAQ</a>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <h4 data-i18n="searchTitle">駅を検索</h4>
+        <div class="search-box">
+          <input id="menuSearch" type="search" placeholder="駅名または駅番号で検索（例: K9 枦崎）" aria-label="駅検索" />
+          <button id="clearSearch" title="クリア" aria-label="検索クリア" style="padding:8px;border-radius:8px;border:1px solid rgba(10,26,63,0.06);background:#f8fafc;cursor:pointer">✕</button>
+        </div>
+
+        <div style="margin-top:8px">
+          <h4 data-i18n="filterTitle">カテゴリで絞る</h4>
+          <div id="categoryButtons"></div>
+        </div>
+
+        <div style="margin-top:10px">
+          <div id="searchResults" class="search-results" aria-live="polite"><div class="small" data-i18n="searchHint">駅名または駅番号で検索してください</div></div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid rgba(10,26,63,0.04);padding-top:8px;color:#6b7280;font-size:13px" data-i18n="menuScrollHint">メニューはスクロールできます</div>
+    </div>
+  </div>
+
+  <main class="container" role="main">
+    <!-- HOME -->
+    <section id="home" class="page active">
+      <section class="hero" aria-labelledby="hero-title">
+        <h1 id="hero-title">街をつなぐ、未来へ走る。<br><span style="font-weight:600" data-i18n="heroSub">紀宮線｜縦浜〜山宮 13駅</span></h1>
+        <div class="route-graphic" id="route" style="margin-top:18px">
+          <svg class="route-svg" viewBox="0 0 1200 160" preserveAspectRatio="xMidYMid meet" role="img" aria-label="route">
+            <g transform="translate(40,80)">
+              <line x1="0" y1="0" x2="1020" y2="0" stroke="#E6EEF8" stroke-width="14" stroke-linecap="round"/>
+              <g id="stns"></g>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <div class="grid" style="margin-top:18px">
+        <div>
+          <section class="card" style="margin-top:18px">
+            <h2 data-i18n="serviceTitle">運行情報（概要）</h2>
+            <div class="small" id="serviceSummary" data-i18n="serviceSummary">現在、平常通り運行しています。</div>
+          </section>
+
+          <section class="card" style="margin-top:18px">
+            <h2 data-i18n="newsTitle">お知らせ</h2>
+            <div id="newsListHome"></div>
+          </section>
+        </div>
+
+        <aside class="sidebar" aria-labelledby="sidebar-title">
+          <div class="card">
+            <div class="section-title" id="sidebar-title" data-i18n="routeFeatureTitle">路線の特徴</div>
+            <p class="small" style="margin-top:8px" data-i18n="routeFeatureText">快速と普通を組み合わせ、枦崎で京賀線と直通、山宮で山宮鉄道と直通します。</p>
+            <div style="margin-top:12px"><button class="back-btn" onclick="showPage('company')" data-i18n="viewCompany">会社情報を見る</button></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 駅情報（カード） -->
+    <section id="stations" class="page">
+      <div class="card">
+        <h2 data-i18n="stationsTitle">駅情報</h2>
+        <p class="small" style="margin-top:8px" data-i18n="stationsHint">カードをクリックすると詳細モーダルが開きます。検索からも駅を探せます。</p>
+        <div class="cards-grid" id="stationCards"></div>
+        <div style="margin-top:12px"><button class="back-btn" onclick="showPage('home')" data-i18n="backHome">ホームに戻る</button></div>
+      </div>
+    </section>
+
+    <!-- 企業情報 -->
+    <section id="company" class="page">
+      <div class="card">
+        <h2 data-i18n="companyTitle">企業情報</h2>
+        <section style="margin-top:12px">
+          <h3 data-i18n="greetingTitle">代表挨拶</h3>
+          <p style="margin-top:8px;color:#334155" data-i18n="greetingText">紀宮鉄道は地域の暮らしと観光を支える存在として、安全で信頼される輸送サービスを提供することを使命としています。今後も地域の皆さまとともに歩み、快適で魅力ある鉄道を目指してまいります。</p>
+          <p style="margin-top:8px;color:#334155;font-weight:700" data-i18n="greetingName">代表取締役社長　山田 太郎</p>
+        </section>
+
+        <section style="margin-top:16px">
+          <h3 data-i18n="recruitTitle">採用・求人情報</h3>
+          <p style="margin-top:8px;color:#334155" data-i18n="recruitText">紀宮鉄道では、地域の交通を支える仲間を募集しています。現在募集中の職種（例）：駅係員、運転士、保守スタッフ、事務職。未経験者歓迎、研修制度と資格支援を整えています。</p>
+          <ul class="small" style="margin-top:8px;color:#334155">
+            <li data-i18n="recruitItem1">雇用形態：正社員・契約社員・パート（職種により異なる）</li>
+            <li data-i18n="recruitItem2">勤務地：紀宮線沿線各駅・本社（枦崎）</li>
+            <li data-i18n="recruitItem3">福利厚生：社会保険、交通費支給、資格取得支援、研修制度</li>
+          </ul>
+        </section>
+
+        <div style="margin-top:12px"><button class="back-btn" onclick="showPage('home')" data-i18n="backHome">ホームに戻る</button></div>
+      </div>
+    </section>
+
+    <!-- ニュース -->
+    <section id="news" class="page">
+      <div class="card">
+        <h2 data-i18n="newsPageTitle">ニュース・プレスリリース</h2>
+        <div id="newsListPage" style="margin-top:12px"></div>
+        <div style="margin-top:12px"><button class="back-btn" onclick="showPage('home')" data-i18n="backHome">ホームに戻る</button></div>
+      </div>
+    </section>
+
+    <!-- 安全 -->
+    <section id="safety" class="page">
+      <div class="card">
+        <h2 data-i18n="safetyTitle">安全・災害情報</h2>
+        <p style="margin-top:8px;color:#334155" data-i18n="safetyText">緊急時は係員の指示に従ってください。ここでは基本的な行動指針をまとめています。</p>
+        <div style="margin-top:12px"><button class="back-btn" onclick="showPage('home')" data-i18n="backHome">ホームに戻る</button></div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="page">
+      <div class="card">
+        <h2 data-i18n="faqTitle">よくある質問（FAQ）</h2>
+        <div style="margin-top:12px">
+          <div class="faq-item">
+            <div class="faq-q" data-target="fa1" data-i18n="faqQ1">遅延や運休の情報はどこで確認できますか</div>
+            <div id="fa1" class="faq-a" data-i18n="faqA1">ページ上部の運行ステータスバナーで最新情報を表示します。詳細は「区間別を見る」を開いてください。</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" data-target="fa2" data-i18n="faqQ2">忘れ物はどうすればいいですか</div>
+            <div id="fa2" class="faq-a" data-i18n="faqA2">各駅の案内窓口で受付します。見つからない場合はお問い合わせください。</div>
+          </div>
+        </div>
+        <div style="margin-top:12px"><button class="back-btn" onclick="showPage('home')" data-i18n="backHome">ホームに戻る</button></div>
+      </div>
+    </section>
+
+    <footer class="footer" role="contentinfo">
+      <div>© Kinomiya Railway</div>
+    </footer>
+  </main>
+
+  <!-- モーダル -->
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div id="modal" class="modal" role="document" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h3 id="modalTitle">駅名</h3>
+        <button class="close-btn" aria-label="閉じる" onclick="closeModal()">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:12px;margin-top:12px">
+        <div>
+          <div id="photo" class="photo">写真風イラスト</div>
+          <p id="modalDesc" class="small" style="margin-top:10px;color:#334155"></p>
+          <div class="stat-grid" style="margin-top:10px">
+            <div class="stat"><div class="small" data-i18n="modalHoursLabel">営業時間</div><div class="num" id="modalHours">—</div></div>
+            <div class="stat"><div class="small" data-i18n="modalRidershipLabel">想定乗降数</div><div class="num" id="modalRidership">—</div></div>
+            <div class="stat"><div class="small" data-i18n="modalEquipLabel">設備</div><div class="num small" id="modalEquip">—</div></div>
+          </div>
+          <h4 style="margin-top:12px" data-i18n="modalAroundTitle">周辺施設</h4>
+          <ul id="modalAround" class="info-list"></ul>
+          <h4 style="margin-top:12px" data-i18n="modalEventsTitle">イベント</h4>
+          <div id="modalEvents"></div>
+          <h4 style="margin-top:12px" data-i18n="modalAccessTitle">アクセシビリティ</h4>
+          <ul id="modalAccess" class="info-list"></ul>
+        </div>
+        <aside>
+          <div class="k9-diagram" id="modalDiagram">構造図</div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* 翻訳データ（省略せず保持） */
+const translations = {
+  ja: {
+    siteTitle: "紀宮鉄道",
+    logoSub: "Kinomiya Railway",
+    statusMain: "現在、平常運行しています",
+    statusSub: "最新情報はここに表示されます",
+    statusDetailToggle: "区間別を見る ▾",
+    menuTitle: "メニュー",
+    miniStatus: "平常",
+    mainPages: "主要ページ",
+    navHome: "ホーム",
+    navStations: "駅情報",
+    navCompany: "企業情報",
+    navNews: "ニュース",
+    navSafety: "安全情報",
+    navFAQ: "FAQ",
+    searchTitle: "駅を検索",
+    filterTitle: "カテゴリで絞る",
+    searchHint: "駅名または駅番号で検索してください",
+    menuScrollHint: "メニューはスクロールできます",
+    heroSub: "紀宮線｜縦浜〜山宮 13駅",
+    serviceTitle: "運行情報（概要）",
+    serviceSummary: "現在、平常通り運行しています。",
+    newsTitle: "お知らせ",
+    routeFeatureTitle: "路線の特徴",
+    routeFeatureText: "快速と普通を組み合わせ、枦崎で京賀線と直通、山宮で山宮鉄道と接続します。",
+    viewCompany: "会社情報を見る",
+    stationsTitle: "駅情報",
+    stationsHint: "カードをクリックすると詳細モーダルが開きます。検索からも駅を探せます。",
+    companyTitle: "企業情報",
+    greetingTitle: "代表挨拶",
+    greetingText: "紀宮鉄道は地域の暮らしと観光を支える存在として、安全で信頼される輸送サービスを提供することを使命としています。今後も地域の皆さまとともに歩み、快適で魅力ある鉄道を目指してまいります。",
+    greetingName: "代表取締役社長　山田 太郎",
+    recruitTitle: "採用・求人情報",
+    recruitText: "紀宮鉄道では、地域の交通を支える仲間を募集しています。現在募集中の職種（例）：駅係員、運転士、保守スタッフ、事務職。未経験者歓迎、研修制度と資格支援を整えています。",
+    recruitItem1: "雇用形態：正社員・契約社員・パート（職種により異なる）",
+    recruitItem2: "勤務地：紀宮線沿線各駅・本社（枦崎）",
+    recruitItem3: "福利厚生：社会保険、交通費支給、資格取得支援、研修制度",
+    newsPageTitle: "ニュース・プレスリリース",
+    safetyTitle: "安全・災害情報",
+    safetyText: "緊急時は係員の指示に従ってください。ここでは基本的な行動指針をまとめています。",
+    faqTitle: "よくある質問（FAQ）",
+    faqQ1: "遅延や運休の情報はどこで確認できますか",
+    faqA1: "ページ上部の運行ステータスバナーで最新情報を表示します。詳細は「区間別を見る」を開いてください。",
+    faqQ2: "忘れ物はどうすればいいですか",
+    faqA2: "各駅の案内窓口で受付します。見つからない場合はお問い合わせください。",
+    backHome: "ホームに戻る",
+    modalHoursLabel: "営業時間",
+    modalRidershipLabel: "想定乗降数",
+    modalEquipLabel: "設備",
+    modalAroundTitle: "周辺施設",
+    modalEventsTitle: "イベント",
+    modalAccessTitle: "アクセシビリティ",
+    seg1Title: "縦浜〜篠宮",
+    seg2Title: "篠宮〜枦崎",
+    seg3Title: "枦崎〜山宮",
+    subscribeLabel: "購読",
+    mailBtn: "メール"
+  },
+  en: {
+    siteTitle: "Kinomiya Railway",
+    logoSub: "Kinomiya Railway",
+    statusMain: "Service operating normally",
+    statusSub: "Latest updates appear here",
+    statusDetailToggle: "View by segment ▾",
+    menuTitle: "Menu",
+    miniStatus: "Normal",
+    mainPages: "Main pages",
+    navHome: "Home",
+    navStations: "Stations",
+    navCompany: "Company",
+    navNews: "News",
+    navSafety: "Safety",
+    navFAQ: "FAQ",
+    searchTitle: "Search stations",
+    filterTitle: "Filter by category",
+    searchHint: "Search by station name or code (e.g. K9 Hashizaki)",
+    menuScrollHint: "Menu is scrollable",
+    heroSub: "Kinomiya Line｜Tatehama — Yamamiya 13 stations",
+    serviceTitle: "Service status (summary)",
+    serviceSummary: "Service is operating normally.",
+    newsTitle: "Announcements",
+    routeFeatureTitle: "Line features",
+    routeFeatureText: "Combines express and local services; through service to Kyoga Line at Hashizaki and Yamamiya Railway at Yamamiya.",
+    viewCompany: "View company info",
+    stationsTitle: "Stations",
+    stationsHint: "Click a card to open details. You can also search from the menu.",
+    companyTitle: "Company information",
+    greetingTitle: "Message from the CEO",
+    greetingText: "Kinomiya Railway is committed to providing safe, reliable transport that supports local life and tourism. We will continue working with the community to offer comfortable and attractive rail services.",
+    greetingName: "President and CEO Taro Yamada",
+    recruitTitle: "Careers and recruitment",
+    recruitText: "We are hiring people who support regional transport. Example roles: station staff, drivers, maintenance, office staff. Training and qualification support available.",
+    recruitItem1: "Employment: Full-time, contract, part-time (varies by role)",
+    recruitItem2: "Locations: Stations along the Kinomiya Line; Head office (Hashizaki)",
+    recruitItem3: "Benefits: Social insurance, commuting allowance, qualification support, training",
+    newsPageTitle: "News and press releases",
+    safetyTitle: "Safety and emergency information",
+    safetyText: "Follow staff instructions in an emergency. This section summarizes basic guidance.",
+    faqTitle: "Frequently Asked Questions",
+    faqQ1: "Where can I check delays or suspensions?",
+    faqA1: "Check the service status banner at the top of the page. Open 'View by segment' for details.",
+    faqQ2: "What should I do about lost property?",
+    faqA2: "Lost items are handled at station information counters. Contact us if you cannot find your item.",
+    backHome: "Back to home",
+    modalHoursLabel: "Opening hours",
+    modalRidershipLabel: "Estimated daily ridership",
+    modalEquipLabel: "Facilities",
+    modalAroundTitle: "Nearby facilities",
+    modalEventsTitle: "Events",
+    modalAccessTitle: "Accessibility",
+    seg1Title: "Tatehama — Shinomiya",
+    seg2Title: "Shinomiya — Hashizaki",
+    seg3Title: "Hashizaki — Yamamiya",
+    subscribeLabel: "Subscribe",
+    mailBtn: "Mail"
+  }
+};
+
+/* 初期言語判定 */
+let lang = (navigator.language && navigator.language.startsWith('en')) ? 'en' : 'ja';
+const langToggleBtn = document.getElementById('langToggle');
+
+/* 駅データ（日本語・英語両方保持） */
+const stations = [
+  { id:"K1",name_jp:"縦浜",name_en:"Tatehama",type:"快速",note:"観光",desc_jp:"海沿いの観光駅。",desc_en:"Seaside tourist station.",hours:"06:30〜23:30",ridership:"8,200",equipment:["自動改札","有人窓口"],around:["ヨーロッパ街"],events:[{title:"縦浜ビーチフェス",date:"7月"}],access:["エレベーターあり"],category:["観光","快速停車"],photo:"" },
+  { id:"K2",name_jp:"なみと",name_en:"Namito",type:"快速",note:"桜並木",desc_jp:"桜並木が続く駅。",desc_en:"Station along cherry blossom avenue.",hours:"06:30〜23:30",ridership:"5,400",equipment:["自動改札","有人窓口"],around:["桜並木通り"],events:[{title:"桜まつり",date:"4月"}],access:["エレベーターあり"],category:["住宅","快速停車"],photo:"" },
+  { id:"K3",name_jp:"花澄",name_en:"Kasumi",type:"普通",note:"下町",desc_jp:"商店街のある下町駅。",desc_en:"Downtown station with shopping street.",hours:"06:30〜23:30",ridership:"3,100",equipment:["自動改札","有人窓口"],around:["商店街"],events:[{title:"花澄朝市",date:"毎月"}],access:["エレベーターあり"],category:["下町","普通"],photo:"" },
+  { id:"K4",name_jp:"篠宮",name_en:"Shinomiya",type:"快速",note:"文化",desc_jp:"文化施設の最寄り駅。",desc_en:"Nearest station to cultural facilities.",hours:"06:30〜23:30",ridership:"6,800",equipment:["自動改札","有人窓口"],around:["篠宮公園"],events:[{title:"篠宮アートフェス",date:"9月"}],access:["エレベーターあり"],category:["文化","快速停車"],photo:"" },
+  { id:"K5",name_jp:"永田橋",name_en:"Nagatabashi",type:"普通",note:"住宅",desc_jp:"川沿いの住宅駅。",desc_en:"Riverside residential station.",hours:"06:30〜23:30",ridership:"2,900",equipment:["自動改札","有人窓口"],around:["永田橋公園"],events:[],access:["エレベーターあり"],category:["住宅","普通"],photo:"" },
+  { id:"K6",name_jp:"逢隈",name_en:"Ookuma",type:"普通",note:"行政",desc_jp:"市役所・病院の最寄り駅。",desc_en:"Near city hall and hospital.",hours:"06:30〜23:30",ridership:"7,200",equipment:["自動改札","有人窓口"],around:["市役所"],events:[{title:"市民フェスタ",date:"10月"}],access:["エレベーターあり"],category:["行政","普通"],photo:"" },
+  { id:"K7",name_jp:"瀧和紀",name_en:"Takiwaki",type:"快速",note:"学術",desc_jp:"大学・医療の学術エリア。",desc_en:"Academic area with university and medical facilities.",hours:"06:30〜23:30",ridership:"12,400",equipment:["自動改札","有人窓口"],around:["瀧和紀大学"],events:[{title:"学園祭",date:"11月"}],access:["エレベーターあり"],category:["学術","快速停車"],photo:"" },
+  { id:"K8",name_jp:"一ノ宮",name_en:"Ichinomiya",type:"快速",note:"観光",desc_jp:"一ノ宮大社の門前町駅。",desc_en:"Gateway to Ichinomiya Shrine.",hours:"06:30〜23:30",ridership:"9,100",equipment:["自動改札","有人窓口"],around:["一ノ宮大社"],events:[{title:"例大祭",date:"6月"}],access:["エレベーターあり"],category:["観光","快速停車"],photo:"" },
+  { id:"K9",name_jp:"枦崎",name_en:"Hashizaki",type:"快速",note:"中心",desc_jp:"市の中心駅。京賀線接続。",desc_en:"City center station with Kyoga Line connection.",hours:"06:30〜23:30",ridership:"28,700",equipment:["自動改札","有人窓口"],around:["セントラルモール"],events:[{title:"ナイトマーケット",date:"毎月"}],access:["エレベーター多数"],category:["中心","快速停車"],photo:"" },
+  { id:"K10",name_jp:"二河",name_en:"Nikawa",type:"普通",note:"住宅",desc_jp:"川と住宅地の駅。",desc_en:"Station near river and residential area.",hours:"06:30〜23:30",ridership:"2,200",equipment:["自動改札","有人窓口"],around:["二河緑道"],events:[],access:["エレベーターあり"],category:["住宅","普通"],photo:"" },
+  { id:"K11",name_jp:"東枦崎",name_en:"Higashi-Hashizaki",type:"快速",note:"副都心",desc_jp:"副都心の高架駅。",desc_en:"Elevated station in sub-center area.",hours:"06:30〜23:30",ridership:"18,500",equipment:["自動改札","有人窓口"],around:["アウトレット"],events:[{title:"アウトレットセール",date:"季節"}],access:["エレベーターあり"],category:["副都心","快速停車"],photo:"" },
+  { id:"K12",name_jp:"芝原",name_en:"Shibahara",type:"普通",note:"住宅",desc_jp:"郊外住宅地の駅。",desc_en:"Suburban residential station.",hours:"06:30〜23:30",ridership:"1,800",equipment:["自動改札","有人窓口"],around:["芝原公園"],events:[],access:["エレベーターあり"],category:["住宅","普通"],photo:"" },
+  { id:"K13",name_jp:"山宮",name_en:"Sangu",type:"快速",note:"中心",desc_jp:"北部ターミナル。山宮鉄道接続。",desc_en:"Northern terminal with Yamamiya Railway connection.",hours:"06:30〜23:30",ridership:"22,300",equipment:["自動改札","有人窓口"],around:["山宮ショッピングパーク"],events:[{title:"山宮フェス",date:"8月"}],access:["エレベーターあり"],category:["中心","快速停車"],photo:"" }
+];
+
+/* カテゴリボタン生成（DOMがある前提） */
+const categoryOrder = ["全駅","快速停車","普通","副都心","観光","住宅","学術","文化","行政","下町","中心"];
+const categories = {};
+stations.forEach(s=> s.category.forEach(c=> categories[c]=true));
+const catButtonsContainer = document.getElementById('categoryButtons');
+if(catButtonsContainer){
+  categoryOrder.forEach(c=>{
+    if(c==="全駅") {
+      const b = document.createElement('button');
+      b.className = 'cat-btn active';
+      b.textContent = c;
+      b.addEventListener('click', ()=> setActiveCategory(c));
+      catButtonsContainer.appendChild(b);
+      return;
+    }
+    if(categories[c]){
+      const b = document.createElement('button');
+      b.className = 'cat-btn';
+      b.textContent = c;
+      b.addEventListener('click', ()=> setActiveCategory(c));
+      catButtonsContainer.appendChild(b);
+    }
+  });
+}
+
+/* SVG 路線図に駅を描画（白ラベル） */
+function renderRouteSVG(){
+  const stnsGroup = document.querySelector('#stns');
+  if(!stnsGroup) return;
+  stnsGroup.innerHTML = '';
+  const total = stations.length;
+  const spacing = 1020 / (total - 1);
+  stations.forEach((s,i)=>{
+    const x = i * spacing;
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('transform', `translate(${x},0)`);
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('r',8);
+    circle.setAttribute('fill', s.type === '普通' ? '#0A1A3F' : '#D4A857');
+    circle.setAttribute('stroke','#fff');
+    circle.setAttribute('stroke-width','2');
+    circle.style.cursor = 'pointer';
+    circle.addEventListener('click', ()=> openModalById(s.id));
+    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('y', -14);
+    text.setAttribute('x', 0);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('class','station-label');
+    text.textContent = (lang === 'ja') ? s.name_jp : s.name_en;
+    const idText = document.createElementNS('http://www.w3.org/2000/svg','text');
+    idText.setAttribute('y', 26);
+    idText.setAttribute('x', 0);
+    idText.setAttribute('text-anchor', 'middle');
+    idText.setAttribute('class','station-id');
+    idText.textContent = s.id;
+    g.appendChild(circle);
+    g.appendChild(text);
+    g.appendChild(idText);
+    stnsGroup.appendChild(g);
+  });
+}
+
+/* プレースホルダー画像（SVGデータURI） */
+function makePlaceholderDataURI(name){
+  const label = name.slice(0,2);
+  const fg = '#0A1A3F';
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='480'><defs><linearGradient id='g' x1='0' x2='1'><stop offset='0' stop-color='#eef6ff'/><stop offset='1' stop-color='#fff'/></linearGradient></defs><rect width='100%' height='100%' fill='url(#g)'/><text x='50%' y='55%' font-family='Noto Sans JP,Inter,Arial' font-size='72' fill='${fg}' font-weight='700' text-anchor='middle' dominant-baseline='middle'>${label}</text></svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+/* 駅カード生成（stationsページ内） */
+function renderStationCards(){
+  const container = document.getElementById('stationCards');
+  if(!container) return;
+  container.innerHTML = '';
+  stations.forEach(s=>{
+    const name = (lang === 'ja') ? s.name_jp : s.name_en;
+    const photo = s.photo && s.photo.length ? s.photo : makePlaceholderDataURI(name);
+    const card = document.createElement('article');
+    card.className = 'station-card';
+    card.innerHTML = `
+      <div><img class="station-thumb" src="${photo}" alt="${name} サムネイル" loading="lazy"></div>
+      <h3>${s.id} ${name}</h3>
+      <div class="meta-line">${s.type} ・ ${s.note}</div>
+      <div class="meta-line">${(lang==='ja')?'営業時間':'Hours'}: ${s.hours}</div>
+      <div style="margin-top:8px"><button class="open-small" onclick="openModalById('${s.id}')">${(lang==='ja')?'詳しく見る':'Details'}</button></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+/* ニュース表示（簡易） */
+function renderNews(){
+  const newsListHome = document.getElementById('newsListHome');
+  const newsListPage = document.getElementById('newsListPage');
+  if(!newsListHome || !newsListPage) return;
+  newsListHome.innerHTML = '';
+  newsListPage.innerHTML = '';
+  const sampleNews = [
+    {title_jp:"紀宮線 新ダイヤ運行開始のお知らせ",title_en:"New timetable on Kinomiya Line", date:"2026-04-01", body_jp:"紀宮線のダイヤ改正を実施します。", body_en:"We will implement a timetable revision."},
+    {title_jp:"東枦崎駅 周辺再開発完了",title_en:"Higashi-Hashizaki redevelopment complete", date:"2025-11-15", body_jp:"駅直結のデッキと商業施設がオープンしました。", body_en:"A deck and commercial facilities directly connected to the station have opened."}
+  ];
+  sampleNews.forEach(n=>{
+    const divHome = document.createElement('div');
+    divHome.innerHTML = `<strong>${(lang==='ja')?n.title_jp:n.title_en}</strong><div class="small" style="color:#6b7280;margin-top:6px">${n.date}</div><p style="margin-top:8px;color:#334155">${(lang==='ja')?n.body_jp:n.body_en}</p>`;
+    newsListHome.appendChild(divHome.cloneNode(true));
+    newsListPage.appendChild(divHome);
+  });
+}
+
+/* ページ切替 */
+function showPage(pageId){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const target = document.getElementById(pageId);
+  if(target) target.classList.add('active');
+  closeMenu();
+  history.replaceState(null, '', `#${pageId}`);
+  if(pageId === 'stations') {
+    renderStationCards();
+  }
+}
+
+/* メニュー制御 */
+const hamburgerBtn = document.getElementById('hamburger');
+const menuPanel = document.getElementById('menuPanel');
+hamburgerBtn.addEventListener('click', ()=> {
+  const open = hamburgerBtn.classList.toggle('open');
+  menuPanel.style.display = open ? 'block' : 'none';
+  menuPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
+  if(open) setTimeout(()=> { const el = document.getElementById('menuSearch'); if(el) el.focus(); }, 120);
+});
+function closeMenu(){ hamburgerBtn.classList.remove('open'); menuPanel.style.display='none'; menuPanel.setAttribute('aria-hidden','true'); }
+
+/* メニューリンク登録（確実に動作） */
+function registerMenuLinks(){
+  document.querySelectorAll('.menu-link').forEach(a=>{
+    a.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const page = a.getAttribute('data-page');
+      if(page) showPage(page);
+    });
+  });
+}
+
+/* カテゴリ絞り込み */
+let activeCategory = "全駅";
+function setActiveCategory(cat){
+  activeCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.cat-btn').forEach(el=>{ if(el.textContent===cat) el.classList.add('active'); });
+  const list = stations.filter(s=> cat==="全駅" ? true : s.category.includes(cat) || s.type===cat);
+  const searchResults = document.getElementById('searchResults');
+  if(!searchResults) return;
+  searchResults.innerHTML = '';
+  if(list.length===0) searchResults.innerHTML = '<div style="color:#6b7280">該当する駅はありません</div>';
+  else list.forEach(s=>{
+    const wrapper = document.createElement('div');
+    wrapper.className = 'row';
+    const a = document.createElement('a');
+    a.href = `#station-${s.id}`;
+    a.textContent = `${s.id} ${(lang==='ja')?s.name_jp:s.name_en} — ${s.note}`;
+    a.addEventListener('click', (e)=>{ e.preventDefault(); closeMenu(); showPage('stations'); setTimeout(()=> { location.hash = `station-${s.id}`; }, 80); });
+    const btn = document.createElement('button');
+    btn.className = 'open-btn';
+    btn.textContent = (lang === 'ja') ? '開く' : 'Open';
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); closeMenu(); openModalById(s.id); });
+    wrapper.appendChild(a);
+    wrapper.appendChild(btn);
+    searchResults.appendChild(wrapper);
+  });
+}
+
+/* 検索機能 */
+const menuSearch = document.getElementById('menuSearch');
+const searchResults = document.getElementById('searchResults');
+const clearSearch = document.getElementById('clearSearch');
+if(menuSearch){
+  menuSearch.addEventListener('input', renderSearchResults);
+  clearSearch.addEventListener('click', ()=>{ menuSearch.value=''; renderSearchResults(); menuSearch.focus(); });
+  menuSearch.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      const q = menuSearch.value.trim().toLowerCase();
+      if(!q) return;
+      const match = stations.find(s=> s.id.toLowerCase().includes(q) || s.name_jp.toLowerCase().includes(q) || s.name_en.toLowerCase().includes(q) || s.note.toLowerCase().includes(q));
+      if(match) { closeMenu(); showPage('stations'); setTimeout(()=> openModalById(match.id), 200); }
+    }
+  });
+}
+function renderSearchResults(){
+  const q = menuSearch.value.trim().toLowerCase();
+  if(!searchResults) return;
+  searchResults.innerHTML = '';
+  if(!q){ searchResults.innerHTML = `<div class="small">${translations[lang].searchHint}</div>`; return; }
+  const matches = stations.filter(s=> s.id.toLowerCase().includes(q) || s.name_jp.toLowerCase().includes(q) || s.name_en.toLowerCase().includes(q) || s.note.toLowerCase().includes(q));
+  if(matches.length===0){ searchResults.innerHTML = `<div class="small">${(lang==='ja')?'該当する駅はありません':'No matching stations'}</div>`; return; }
+  matches.forEach(s=>{
+    const wrapper = document.createElement('div');
+    wrapper.className = 'row';
+    const a = document.createElement('a');
+    a.href = `#station-${s.id}`;
+    a.textContent = `${s.id} ${(lang==='ja')?s.name_jp:s.name_en} — ${s.note}`;
+    a.addEventListener('click', (e)=>{ e.preventDefault(); closeMenu(); showPage('stations'); setTimeout(()=> { location.hash = `station-${s.id}`; }, 80); });
+    const btn = document.createElement('button');
+    btn.className = 'open-btn';
+    btn.textContent = (lang==='ja') ? '開く' : 'Open';
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); closeMenu(); openModalById(s.id); });
+    wrapper.appendChild(a);
+    wrapper.appendChild(btn);
+    searchResults.appendChild(wrapper);
+  });
+}
+
+/* モーダル制御 */
+const backdrop = document.getElementById('modalBackdrop');
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const modalDesc = document.getElementById('modalDesc');
+const modalAround = document.getElementById('modalAround');
+const modalHours = document.getElementById('modalHours');
+const modalRidership = document.getElementById('modalRidership');
+const modalEquip = document.getElementById('modalEquip');
+const modalEvents = document.getElementById('modalEvents');
+const modalAccess = document.getElementById('modalAccess');
+const photo = document.getElementById('photo');
+
+function openModalById(stationId){
+  const s = stations.find(x=>x.id===stationId);
+  if(!s) return;
+  const name = (lang === 'ja') ? s.name_jp : s.name_en;
+  const desc = (lang === 'ja') ? s.desc_jp : s.desc_en;
+  modalTitle.textContent = `${s.id} ${name}`;
+  modalDesc.textContent = desc;
+  modalAround.innerHTML = ''; s.around.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; modalAround.appendChild(li); });
+  modalHours.textContent = s.hours || '—';
+  modalRidership.textContent = s.ridership || '—';
+  modalEquip.textContent = s.equipment.join('； ');
+  modalEvents.innerHTML = ''; if(s.events && s.events.length){ s.events.forEach(ev=>{ const div=document.createElement('div'); div.className='event'; div.innerHTML=`<strong>${ev.title}</strong><div class="small" style="color:#6b7280">${ev.date}</div>`; modalEvents.appendChild(div); }); } else modalEvents.innerHTML = `<div class="small">${(lang==='ja')?'現在予定はありません':'No scheduled events'}</div>`;
+  modalAccess.innerHTML = ''; (s.access||[]).forEach(a=>{ const li=document.createElement('li'); li.textContent=a; modalAccess.appendChild(li); });
+  photo.textContent = `${name} ${(lang==='ja')?'の風景':'photo'}`;
+  backdrop.style.display = 'flex'; setTimeout(()=>{ modal.classList.add('show'); backdrop.setAttribute('aria-hidden','false'); }, 10);
+}
+function closeModal(){ modal.classList.remove('show'); backdrop.setAttribute('aria-hidden','true'); setTimeout(()=>{ backdrop.style.display='none'; },220); }
+backdrop.addEventListener('click',(e)=>{ if(e.target===backdrop) closeModal(); });
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && backdrop.style.display==='flex') closeModal(); });
+
+/* FAQアコーディオン */
+document.querySelectorAll('.faq-q').forEach(q=>{
+  q.addEventListener('click', ()=>{
+    const id = q.getAttribute('data-target');
+    const a = document.getElementById(id);
+    if(a.style.display === 'block') a.style.display = 'none';
+    else a.style.display = 'block';
+  });
+});
+
+/* ステータス詳細トグル */
+const statusToggle = document.getElementById('statusDetailToggle');
+const statusDetail = document.getElementById('statusDetail');
+statusToggle.addEventListener('click', ()=> {
+  statusDetail.style.display = statusDetail.style.display === 'block' ? 'none' : 'block';
+});
+
+/* デモ用：運行ステータス切替 */
+function setDemoStatus(mode){
+  const dot = document.getElementById('statusDot');
+  const main = document.getElementById('statusMain');
+  const mini = document.getElementById('miniStatus');
+  const seg1 = document.getElementById('seg1');
+  const seg2 = document.getElementById('seg2');
+  const seg3 = document.getElementById('seg3');
+  const serviceSummary = document.getElementById('serviceSummary');
+  if(mode === 'ok'){
+    dot.style.background = 'var(--ok)';
+    main.textContent = translations[lang].statusMain;
+    mini.textContent = translations[lang].miniStatus;
+    seg1.textContent = translations[lang].seg1Title + '：' + (lang==='ja'?'平常（遅延なし）':'Normal (no delays)');
+    seg2.textContent = translations[lang].seg2Title + '：' + (lang==='ja'?'平常（遅延なし）':'Normal (no delays)');
+    seg3.textContent = translations[lang].seg3Title + '：' + (lang==='ja'?'平常（遅延なし）':'Normal (no delays)');
+    serviceSummary.textContent = translations[lang].serviceSummary;
+  } else if(mode === 'warn'){
+    dot.style.background = 'var(--warn)';
+    main.textContent = (lang==='ja')?'一部区間で遅延が発生しています':'Some segments experiencing delays';
+    mini.textContent = (lang==='ja')?'注意':'Warning';
+    seg1.textContent = (lang==='ja')?'縦浜〜篠宮：遅延 5〜10分':'Tatehama—Shinomiya: delay 5–10 min';
+    seg2.textContent = translations[lang].seg2Title + '：' + (lang==='ja'?'平常':'Normal');
+    seg3.textContent = translations[lang].seg3Title + '：' + (lang==='ja'?'平常':'Normal');
+    serviceSummary.textContent = (lang==='ja')?'一部区間で遅延が発生しています。':'Some segments experiencing delays.';
+  } else {
+    dot.style.background = 'var(--danger)';
+    main.textContent = (lang==='ja')?'一部区間で運休が発生しています':'Some segments suspended';
+    mini.textContent = (lang==='ja')?'運休':'Suspended';
+    seg1.textContent = (lang==='ja')?'縦浜〜篠宮：運休（代行バスあり）':'Tatehama—Shinomiya: suspended (bus substitution)';
+    seg2.textContent = (lang==='ja')?'篠宮〜枦崎：遅延 20分':'Shinomiya—Hashizaki: delay 20 min';
+    seg3.textContent = translations[lang].seg3Title + '：' + (lang==='ja'?'平常':'Normal');
+    serviceSummary.textContent = (lang==='ja')?'一部区間で運休が発生しています。':'Some segments suspended.';
+  }
+}
+
+/* 翻訳適用と表示更新（路線図・カード・ニュース・モーダル） */
+function applyTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(translations[lang] && translations[lang][key]) el.textContent = translations[lang][key];
+  });
+  langToggleBtn.textContent = (lang === 'ja') ? 'EN' : 'JP';
+  document.documentElement.lang = (lang === 'ja') ? 'ja' : 'en';
+  renderRouteSVG();
+  renderStationCards();
+  renderNews();
+  setDemoStatus('ok');
+}
+
+/* 言語切替ボタン */
+langToggleBtn.addEventListener('click', ()=>{
+  lang = (lang === 'ja') ? 'en' : 'ja';
+  applyTranslations();
+});
+
+/* 初期化 */
+document.addEventListener('DOMContentLoaded', ()=>{
+  registerMenuLinks();
+  renderRouteSVG();
+  renderNews();
+  // 初期ページ
+  const h = location.hash.replace('#','');
+  if(h && document.getElementById(h)) showPage(h);
+  else showPage('home');
+  setDemoStatus('ok');
+});
+
+/* ハッシュでモーダル自動オープン（例: #station-K9） */
+window.addEventListener('hashchange', ()=>{
+  const h = location.hash.replace('#','');
+  if(!h) return;
+  if(h.startsWith('station-')){
+    const id = h.replace('station-','');
+    showPage('stations');
+    setTimeout(()=> openModalById(id), 220);
+  } else {
+    if(document.getElementById(h)) showPage(h);
+  }
+});
+
+/* ヘルパー */
+function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+</script>
+</body>
+</html>
